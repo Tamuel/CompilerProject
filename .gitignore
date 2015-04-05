@@ -1,0 +1,6 @@
+*.sdf
+*.tlog
+CminusCompiler.sln
+CminusCompiler/CminusCompiler.vcxproj
+CminusCompiler/CminusCompiler.vcxproj.filters
+CminusCompiler/Debug/vc120.idb

@@ -1,0 +1,1088 @@
+  1 : #include <stdio.h>
+	  1 :ERROR, #
+	  1 :ID, name = include
+	  1 :<
+	  1 :ID, name = stdio
+	  1 :ERROR, .
+	  1 :ID, name = h
+	  1 :>
+  2 : #include <string.h>
+	  2 :ERROR, #
+	  2 :ID, name = include
+	  2 :<
+	  2 :ID, name = string
+	  2 :ERROR, .
+	  2 :ID, name = h
+	  2 :>
+  3 : #include <stdlib.h>
+	  3 :ERROR, #
+	  3 :ID, name = include
+	  3 :<
+	  3 :ID, name = stdlib
+	  3 :ERROR, .
+	  3 :ID, name = h
+	  3 :>
+  4 : #include "global_variable.h"
+	  4 :ERROR, #
+	  4 :ID, name = include
+	  4 :ERROR, "
+	  4 :ID, name = global
+	  4 :ERROR, _
+	  4 :ID, name = variable
+	  4 :ERROR, .
+	  4 :ID, name = h
+	  4 :ERROR, "
+  5 : #include "symbol_check.h"
+	  5 :ERROR, #
+	  5 :ID, name = include
+	  5 :ERROR, "
+	  5 :ID, name = symbol
+	  5 :ERROR, _
+	  5 :ID, name = check
+	  5 :ERROR, .
+	  5 :ID, name = h
+	  5 :ERROR, "
+  6 : #include "scanner_in.h"
+	  6 :ERROR, #
+	  6 :ID, name = include
+	  6 :ERROR, "
+	  6 :ID, name = scanner
+	  6 :ERROR, _
+	  6 :ID, name = in
+	  6 :ERROR, .
+	  6 :ID, name = h
+	  6 :ERROR, "
+  7 : 
+  8 : /* ID 문자열 */
+  9 : static char identifier[LENGTH_OF_ID] = "";
+	  9 :ID, name = static
+	  9 :ID, name = char
+	  9 :ID, name = identifier
+	  9 :[
+	  9 :ID, name = LENGTH
+	  9 :ERROR, _
+	  9 :ID, name = OF
+	  9 :ERROR, _
+	  9 :ID, name = ID
+	  9 :]
+	  9 :=
+	  9 :ERROR, ""
+	  9 :;
+ 10 : enum status type = WHITE_SPACE; /* 현재 state */
+	 10 :ID, name = enum
+	 10 :ID, name = status
+	 10 :ID, name = type
+	 10 :=
+	 10 :ID, name = WHITE
+	 10 :ERROR, _
+	 10 :ID, name = SPACE
+	 10 :;
+ 11 : int line = 1; /* 현재 줄 */
+	 11 : reserved word : int
+	 11 :ID, name = line
+	 11 :=
+	 11 : NUM, val = 1
+	 11 :;
+ 12 : int count = 1; /* 현재 토큰 번호 */
+	 12 : reserved word : int
+	 12 :ID, name = count
+	 12 :=
+	 12 : NUM, val = 1
+	 12 :;
+ 13 : int noConsume = FALSE; /* 숫자, 특수 문자, 문자가 붙어있을 경우, 에러일 경우 문자를 컴슘하지 않음 */
+	 13 : reserved word : int
+	 13 :ID, name = noConsume
+	 13 :=
+	 13 :ID, name = FALSE
+	 13 :;
+ 14 : 
+ 15 : /* 스캔한 토큰 출력 */
+ 16 : void printOut(tokenPointer list, FILE* sourceCode, char* output);
+	 16 : reserved word : void
+	 16 :ID, name = printOut
+	 16 :(
+	 16 :ID, name = tokenPointer
+	 16 :ID, name = list
+	 16 :,
+	 16 :ID, name = FILE
+	 16 :*
+	 16 :ID, name = sourceCode
+	 16 :,
+	 16 :ID, name = char
+	 16 :*
+	 16 :ID, name = output
+	 16 :)
+	 16 :;
+ 17 : 
+ 18 : int scanner(char* input, char* output)
+	 18 : reserved word : int
+	 18 :ID, name = scanner
+	 18 :(
+	 18 :ID, name = char
+	 18 :*
+	 18 :ID, name = input
+	 18 :,
+	 18 :ID, name = char
+	 18 :*
+	 18 :ID, name = output
+	 18 :)
+ 19 : {
+	 19 :{
+ 20 : 	tokenPointer tokenList = NULL;
+	 20 :ID, name = tokenPointer
+	 20 :ID, name = tokenList
+	 20 :=
+	 20 :ID, name = NULL
+	 20 :;
+ 21 : 
+ 22 : 	FILE* sourceCode = fopen(input, "r");
+	 22 :ID, name = FILE
+	 22 :*
+	 22 :ID, name = sourceCode
+	 22 :=
+	 22 :ID, name = fopen
+	 22 :(
+	 22 :ID, name = input
+	 22 :,
+	 22 :ERROR, "
+	 22 :ID, name = r
+	 22 :ERROR, "
+	 22 :)
+	 22 :;
+ 23 : 	char lookAhead; /* 탐색을 위한 Character */
+	 23 :ID, name = char
+	 23 :ID, name = lookAhead
+	 23 :;
+ 24 : 
+ 25 : 	if (sourceCode == NULL) /* 파일 입출력 실패 */
+	 25 : reserved word : if
+	 25 :(
+	 25 :ID, name = sourceCode
+	 25 :==
+	 25 :ID, name = NULL
+	 25 :)
+ 26 : 	{
+	 26 :{
+ 27 : 		printf("File open fail\n");
+	 27 :ID, name = printf
+	 27 :(
+	 27 :ERROR, "
+	 27 :ID, name = File
+	 27 :ID, name = open
+	 27 :ID, name = fail
+	 27 :ERROR, \
+	 27 :ID, name = n
+	 27 :ERROR, "
+	 27 :)
+	 27 :;
+ 28 : 		return FALSE;
+	 28 : reserved word : return
+	 28 :ID, name = FALSE
+	 28 :;
+ 29 : 	}
+	 29 :}
+ 30 : 	else /* 파일 입출력 성공 */
+	 30 : reserved word : else
+ 31 : 	{
+	 31 :{
+ 32 : 		printf("File open successfully\n");
+	 32 :ID, name = printf
+	 32 :(
+	 32 :ERROR, "
+	 32 :ID, name = File
+	 32 :ID, name = open
+	 32 :ID, name = successfully
+	 32 :ERROR, \
+	 32 :ID, name = n
+	 32 :ERROR, "
+	 32 :)
+	 32 :;
+ 33 : 
+ 34 : 		/* File read */
+ 35 : 		while ((lookAhead = fgetc(sourceCode)) != EOF) /* lookAhead로 문자열을 하나씩 컨슘함 */
+	 35 : reserved word : while
+	 35 :(
+	 35 :(
+	 35 :ID, name = lookAhead
+	 35 :=
+	 35 :ID, name = fgetc
+	 35 :(
+	 35 :ID, name = sourceCode
+	 35 :)
+	 35 :)
+	 35 :!=
+	 35 :ID, name = EOF
+	 35 :)
+ 36 : 		{
+	 36 :{
+ 37 : 			/* 타입 체크 */
+ 38 : 			if (type != COMMENT)
+	 38 : reserved word : if
+	 38 :(
+	 38 :ID, name = type
+	 38 :!=
+	 38 :ID, name = COMMENT
+	 38 :)
+ 39 : 				type = typeCheck(&lookAhead);
+	 39 :ID, name = type
+	 39 :=
+	 39 :ID, name = typeCheck
+	 39 :(
+	 39 :ERROR, &
+	 39 :ID, name = lookAhead
+	 39 :)
+	 39 :;
+ 40 : 
+ 41 : 			do
+	 41 :ID, name = do
+ 42 : 			{
+	 42 :{
+ 43 : 				noConsume = FALSE; /* 서로 다른 타입의 심볼이 붙어 있는지 판별 */
+	 43 :ID, name = noConsume
+	 43 :=
+	 43 :ID, name = FALSE
+	 43 :;
+ 44 : 
+ 45 : 				switch (type)
+	 45 :ID, name = switch
+	 45 :(
+	 45 :ID, name = type
+	 45 :)
+ 46 : 				{
+	 46 :{
+ 47 : 				case WHITE_SPACE:
+	 47 :ID, name = case
+	 47 :ID, name = WHITE
+	 47 :ERROR, _
+	 47 :ID, name = SPACE
+	 47 :ERROR, :
+ 48 : 					break;
+	 48 :ID, name = break
+	 48 :;
+ 49 : 
+ 50 : 				case COMMENT: /* 코멘트일 경우 끝날 때까지 모두 컨슘 */
+	 50 :ID, name = case
+	 50 :ID, name = COMMENT
+	 50 :ERROR, :
+ 51 : 					checkInComment(sourceCode, &lookAhead, &line, &type);
+	 51 :ID, name = checkInComment
+	 51 :(
+	 51 :ID, name = sourceCode
+	 51 :,
+	 51 :ERROR, &
+	 51 :ID, name = lookAhead
+	 51 :,
+	 51 :ERROR, &
+	 51 :ID, name = line
+	 51 :,
+	 51 :ERROR, &
+	 51 :ID, name = type
+	 51 :)
+	 51 :;
+ 52 : 					break;
+	 52 :ID, name = break
+	 52 :;
+ 53 : 
+ 54 : 				case ID:
+	 54 :ID, name = case
+	 54 :ID, name = ID
+	 54 :ERROR, :
+ 55 : 					if (checkInID(sourceCode, &lookAhead, identifier))
+	 55 : reserved word : if
+	 55 :(
+	 55 :ID, name = checkInID
+	 55 :(
+	 55 :ID, name = sourceCode
+	 55 :,
+	 55 :ERROR, &
+	 55 :ID, name = lookAhead
+	 55 :,
+	 55 :ID, name = identifier
+	 55 :)
+	 55 :)
+ 56 : 						makeToken(&tokenList, identifier, type, line, &count);
+	 56 :ID, name = makeToken
+	 56 :(
+	 56 :ERROR, &
+	 56 :ID, name = tokenList
+	 56 :,
+	 56 :ID, name = identifier
+	 56 :,
+	 56 :ID, name = type
+	 56 :,
+	 56 :ID, name = line
+	 56 :,
+	 56 :ERROR, &
+	 56 :ID, name = count
+	 56 :)
+	 56 :;
+ 57 : 
+ 58 : 					if (!isLetter(lookAhead) && !isWhiteSpace(lookAhead))
+	 58 : reserved word : if
+	 58 :(
+	 58 :ID, name = isLetter
+	 58 :(
+	 58 :ID, name = lookAhead
+	 58 :)
+	 58 :ERROR, &&
+	 58 :ID, name = isWhiteSpace
+	 58 :(
+	 58 :ID, name = lookAhead
+	 58 :)
+	 58 :)
+ 59 : 					{
+	 59 :{
+ 60 : 						noConsume = TRUE;
+	 60 :ID, name = noConsume
+	 60 :=
+	 60 :ID, name = TRUE
+	 60 :;
+ 61 : 						type = typeCheck(&lookAhead);
+	 61 :ID, name = type
+	 61 :=
+	 61 :ID, name = typeCheck
+	 61 :(
+	 61 :ERROR, &
+	 61 :ID, name = lookAhead
+	 61 :)
+	 61 :;
+ 62 : 					}
+	 62 :}
+ 63 : 					break;
+	 63 :ID, name = break
+	 63 :;
+ 64 : 
+ 65 : 				case DIGIT:
+	 65 :ID, name = case
+	 65 :ID, name = DIGIT
+	 65 :ERROR, :
+ 66 : 					if (checkInDigit(sourceCode, &lookAhead, identifier))
+	 66 : reserved word : if
+	 66 :(
+	 66 :ID, name = checkInDigit
+	 66 :(
+	 66 :ID, name = sourceCode
+	 66 :,
+	 66 :ERROR, &
+	 66 :ID, name = lookAhead
+	 66 :,
+	 66 :ID, name = identifier
+	 66 :)
+	 66 :)
+ 67 : 						makeToken(&tokenList, identifier, type, line, &count);
+	 67 :ID, name = makeToken
+	 67 :(
+	 67 :ERROR, &
+	 67 :ID, name = tokenList
+	 67 :,
+	 67 :ID, name = identifier
+	 67 :,
+	 67 :ID, name = type
+	 67 :,
+	 67 :ID, name = line
+	 67 :,
+	 67 :ERROR, &
+	 67 :ID, name = count
+	 67 :)
+	 67 :;
+ 68 : 
+ 69 : 					if (!isDigit(lookAhead) && !isWhiteSpace(lookAhead))
+	 69 : reserved word : if
+	 69 :(
+	 69 :ID, name = isDigit
+	 69 :(
+	 69 :ID, name = lookAhead
+	 69 :)
+	 69 :ERROR, &&
+	 69 :ID, name = isWhiteSpace
+	 69 :(
+	 69 :ID, name = lookAhead
+	 69 :)
+	 69 :)
+ 70 : 					{
+	 70 :{
+ 71 : 						noConsume = TRUE;
+	 71 :ID, name = noConsume
+	 71 :=
+	 71 :ID, name = TRUE
+	 71 :;
+ 72 : 						type = typeCheck(&lookAhead);
+	 72 :ID, name = type
+	 72 :=
+	 72 :ID, name = typeCheck
+	 72 :(
+	 72 :ERROR, &
+	 72 :ID, name = lookAhead
+	 72 :)
+	 72 :;
+ 73 : 					}
+	 73 :}
+ 74 : 					break;
+	 74 :ID, name = break
+	 74 :;
+ 75 : 
+ 76 : 				case SPECIAL_SYMBOL:
+	 76 :ID, name = case
+	 76 :ID, name = SPECIAL
+	 76 :ERROR, _
+	 76 :ID, name = SYMBOL
+	 76 :ERROR, :
+ 77 : 					switch (checkInSpecialSymbol(sourceCode, &lookAhead, identifier))
+	 77 :ID, name = switch
+	 77 :(
+	 77 :ID, name = checkInSpecialSymbol
+	 77 :(
+	 77 :ID, name = sourceCode
+	 77 :,
+	 77 :ERROR, &
+	 77 :ID, name = lookAhead
+	 77 :,
+	 77 :ID, name = identifier
+	 77 :)
+	 77 :)
+ 78 : 					{
+	 78 :{
+ 79 : 					case TRUE: /* 일반적인 특수문자 일 경우 */
+	 79 :ID, name = case
+	 79 :ID, name = TRUE
+	 79 :ERROR, :
+ 80 : 						makeToken(&tokenList, identifier, type, line, &count);
+	 80 :ID, name = makeToken
+	 80 :(
+	 80 :ERROR, &
+	 80 :ID, name = tokenList
+	 80 :,
+	 80 :ID, name = identifier
+	 80 :,
+	 80 :ID, name = type
+	 80 :,
+	 80 :ID, name = line
+	 80 :,
+	 80 :ERROR, &
+	 80 :ID, name = count
+	 80 :)
+	 80 :;
+ 81 : 						break;
+	 81 :ID, name = break
+	 81 :;
+ 82 : 
+ 83 : 					case COMMENT: /* 코멘트일 경우 */
+	 83 :ID, name = case
+	 83 :ID, name = COMMENT
+	 83 :ERROR, :
+ 84 : 						type = COMMENT;
+	 84 :ID, name = type
+	 84 :=
+	 84 :ID, name = COMMENT
+	 84 :;
+ 85 : 						break;
+	 85 :ID, name = break
+	 85 :;
+ 86 : 
+ 87 : 					case ERROR: /* 에러가 났을 경우 */
+	 87 :ID, name = case
+	 87 :ID, name = ERROR
+	 87 :ERROR, :
+ 88 : 						type = ERROR;
+	 88 :ID, name = type
+	 88 :=
+	 88 :ID, name = ERROR
+	 88 :;
+ 89 : 						break;
+	 89 :ID, name = break
+	 89 :;
+ 90 : 					}
+	 90 :}
+ 91 : 
+ 92 : 					if (!isSpecialSymbol(lookAhead) && !isWhiteSpace(lookAhead))
+	 92 : reserved word : if
+	 92 :(
+	 92 :ID, name = isSpecialSymbol
+	 92 :(
+	 92 :ID, name = lookAhead
+	 92 :)
+	 92 :ERROR, &&
+	 92 :ID, name = isWhiteSpace
+	 92 :(
+	 92 :ID, name = lookAhead
+	 92 :)
+	 92 :)
+ 93 : 					{
+	 93 :{
+ 94 : 						noConsume = TRUE;
+	 94 :ID, name = noConsume
+	 94 :=
+	 94 :ID, name = TRUE
+	 94 :;
+ 95 : 						type = typeCheck(&lookAhead);
+	 95 :ID, name = type
+	 95 :=
+	 95 :ID, name = typeCheck
+	 95 :(
+	 95 :ERROR, &
+	 95 :ID, name = lookAhead
+	 95 :)
+	 95 :;
+ 96 : 					}
+	 96 :}
+ 97 : 					break;
+	 97 :ID, name = break
+	 97 :;
+ 98 : 
+ 99 : 				case ERROR:
+	 99 :ID, name = case
+	 99 :ID, name = ERROR
+	 99 :ERROR, :
+100 : 					checkInError(sourceCode, &lookAhead, identifier);
+	100 :ID, name = checkInError
+	100 :(
+	100 :ID, name = sourceCode
+	100 :,
+	100 :ERROR, &
+	100 :ID, name = lookAhead
+	100 :,
+	100 :ID, name = identifier
+	100 :)
+	100 :;
+101 : 					makeToken(&tokenList, identifier, ERROR, line, &count);
+	101 :ID, name = makeToken
+	101 :(
+	101 :ERROR, &
+	101 :ID, name = tokenList
+	101 :,
+	101 :ID, name = identifier
+	101 :,
+	101 :ID, name = ERROR
+	101 :,
+	101 :ID, name = line
+	101 :,
+	101 :ERROR, &
+	101 :ID, name = count
+	101 :)
+	101 :;
+102 : 					type = typeCheck(&lookAhead);
+	102 :ID, name = type
+	102 :=
+	102 :ID, name = typeCheck
+	102 :(
+	102 :ERROR, &
+	102 :ID, name = lookAhead
+	102 :)
+	102 :;
+103 : 
+104 : 					if (type != ERROR && type != WHITE_SPACE) /* 에러를 처리한 후 타입이 에러가 아니라도 미리 앞을 봤으므로 컨슘을 또 하지 않음, White Space일 경우 그대로 진행 */
+	104 : reserved word : if
+	104 :(
+	104 :ID, name = type
+	104 :!=
+	104 :ID, name = ERROR
+	104 :ERROR, &&
+	104 :ID, name = type
+	104 :!=
+	104 :ID, name = WHITE
+	104 :ERROR, _
+	104 :ID, name = SPACE
+	104 :)
+105 : 						noConsume = TRUE;
+	105 :ID, name = noConsume
+	105 :=
+	105 :ID, name = TRUE
+	105 :;
+106 : 					break;
+	106 :ID, name = break
+	106 :;
+107 : 				}
+	107 :}
+108 : 				
+109 : 				if (lookAhead == '\n')
+	109 : reserved word : if
+	109 :(
+	109 :ID, name = lookAhead
+	109 :==
+	109 :ERROR, '\
+	109 :ID, name = n
+	109 :ERROR, '
+	109 :)
+110 : 					line++;
+	110 :ID, name = line
+	110 :+
+	110 :+
+	110 :;
+111 : 
+112 : 			} while (noConsume || type == ERROR); /* 서로 다른 타입의 심볼이 붙어 있을 경우, 에러일 경우 fgetc로 컨슘 하지 않고 바로 다시 체크 */
+	112 :}
+	112 : reserved word : while
+	112 :(
+	112 :ID, name = noConsume
+	112 :ERROR, ||
+	112 :ID, name = type
+	112 :==
+	112 :ID, name = ERROR
+	112 :)
+	112 :;
+113 : 		}
+	113 :}
+114 : 
+115 : 
+116 : 		/* 토큰 출력 */
+117 : 		printOut(tokenList, sourceCode, output);
+	117 :ID, name = printOut
+	117 :(
+	117 :ID, name = tokenList
+	117 :,
+	117 :ID, name = sourceCode
+	117 :,
+	117 :ID, name = output
+	117 :)
+	117 :;
+118 : 		printf("Scanning Finish\n");
+	118 :ID, name = printf
+	118 :(
+	118 :ERROR, "
+	118 :ID, name = Scanning
+	118 :ID, name = Finish
+	118 :ERROR, \
+	118 :ID, name = n
+	118 :ERROR, "
+	118 :)
+	118 :;
+119 : 
+120 : 		if (fclose(sourceCode) == 0)
+	120 : reserved word : if
+	120 :(
+	120 :ID, name = fclose
+	120 :(
+	120 :ID, name = sourceCode
+	120 :)
+	120 :==
+	120 : NUM, val = 0
+	120 :)
+121 : 			printf("File close successfully\n");
+	121 :ID, name = printf
+	121 :(
+	121 :ERROR, "
+	121 :ID, name = File
+	121 :ID, name = close
+	121 :ID, name = successfully
+	121 :ERROR, \
+	121 :ID, name = n
+	121 :ERROR, "
+	121 :)
+	121 :;
+122 : 		else
+	122 : reserved word : else
+123 : 			printf("File close fail\n");
+	123 :ID, name = printf
+	123 :(
+	123 :ERROR, "
+	123 :ID, name = File
+	123 :ID, name = close
+	123 :ID, name = fail
+	123 :ERROR, \
+	123 :ID, name = n
+	123 :ERROR, "
+	123 :)
+	123 :;
+124 : 	}
+	124 :}
+125 : }
+	125 :}
+126 : 
+127 : void printOut(tokenPointer list, FILE* sourceCode, char* output)
+	127 : reserved word : void
+	127 :ID, name = printOut
+	127 :(
+	127 :ID, name = tokenPointer
+	127 :ID, name = list
+	127 :,
+	127 :ID, name = FILE
+	127 :*
+	127 :ID, name = sourceCode
+	127 :,
+	127 :ID, name = char
+	127 :*
+	127 :ID, name = output
+	127 :)
+128 : {
+	128 :{
+129 : 	FILE* out = fopen(output, "w");
+	129 :ID, name = FILE
+	129 :*
+	129 :ID, name = out
+	129 :=
+	129 :ID, name = fopen
+	129 :(
+	129 :ID, name = output
+	129 :,
+	129 :ERROR, "
+	129 :ID, name = w
+	129 :ERROR, "
+	129 :)
+	129 :;
+130 : 	char temp = NULL;
+	130 :ID, name = char
+	130 :ID, name = temp
+	130 :=
+	130 :ID, name = NULL
+	130 :;
+131 : 	int line = 1;
+	131 : reserved word : int
+	131 :ID, name = line
+	131 :=
+	131 : NUM, val = 1
+	131 :;
+132 : 
+133 : 	tokenPointer check;
+	133 :ID, name = tokenPointer
+	133 :ID, name = check
+	133 :;
+134 : 	check = list;
+	134 :ID, name = check
+	134 :=
+	134 :ID, name = list
+	134 :;
+135 : 
+136 : 	fseek(sourceCode, 0L, SEEK_SET);
+	136 :ID, name = fseek
+	136 :(
+	136 :ID, name = sourceCode
+	136 :,
+	136 : NUM, val = 0
+	136 :ID, name = L
+	136 :,
+	136 :ID, name = SEEK
+	136 :ERROR, _
+	136 :ID, name = SET
+	136 :)
+	136 :;
+137 : 
+138 : 	while (temp != EOF)
+	138 : reserved word : while
+	138 :(
+	138 :ID, name = temp
+	138 :!=
+	138 :ID, name = EOF
+	138 :)
+139 : 	{
+	139 :{
+140 : 		fprintf(out, "%3d : ", line);
+	140 :ID, name = fprintf
+	140 :(
+	140 :ID, name = out
+	140 :,
+	140 :ERROR, "%
+	140 : NUM, val = 3
+	140 :ID, name = d
+	140 :ERROR, :
+	140 :ERROR, "
+	140 :,
+	140 :ID, name = line
+	140 :)
+	140 :;
+141 : 		while ((temp = fgetc(sourceCode)) != '\n' && temp != EOF)
+	141 : reserved word : while
+	141 :(
+	141 :(
+	141 :ID, name = temp
+	141 :=
+	141 :ID, name = fgetc
+	141 :(
+	141 :ID, name = sourceCode
+	141 :)
+	141 :)
+	141 :!=
+	141 :ERROR, '\
+	141 :ID, name = n
+	141 :ERROR, '
+	141 :ERROR, &&
+	141 :ID, name = temp
+	141 :!=
+	141 :ID, name = EOF
+	141 :)
+142 : 			fprintf(out, "%c", temp);
+	142 :ID, name = fprintf
+	142 :(
+	142 :ID, name = out
+	142 :,
+	142 :ERROR, "%
+	142 :ID, name = c
+	142 :ERROR, "
+	142 :,
+	142 :ID, name = temp
+	142 :)
+	142 :;
+143 : 		fprintf(out, "\n");
+	143 :ID, name = fprintf
+	143 :(
+	143 :ID, name = out
+	143 :,
+	143 :ERROR, "\
+	143 :ID, name = n
+	143 :ERROR, "
+	143 :)
+	143 :;
+144 : 
+145 : 		while (check != NULL && (*check).line == line)
+	145 : reserved word : while
+	145 :(
+	145 :ID, name = check
+	145 :!=
+	145 :ID, name = NULL
+	145 :ERROR, &&
+	145 :(
+	145 :*
+	145 :ID, name = check
+	145 :)
+	145 :ERROR, .
+	145 :ID, name = line
+	145 :==
+	145 :ID, name = line
+	145 :)
+146 : 		{
+	146 :{
+147 : 			switch ((*check).type)
+	147 :ID, name = switch
+	147 :(
+	147 :(
+	147 :*
+	147 :ID, name = check
+	147 :)
+	147 :ERROR, .
+	147 :ID, name = type
+	147 :)
+148 : 			{
+	148 :{
+149 : 			case KEYWORD:
+	149 :ID, name = case
+	149 :ID, name = KEYWORD
+	149 :ERROR, :
+150 : 				fprintf(out, "\t%3d : reserved word : %s\n", (*check).line, (*check).data);
+	150 :ID, name = fprintf
+	150 :(
+	150 :ID, name = out
+	150 :,
+	150 :ERROR, "\
+	150 :ID, name = t
+	150 :ERROR, %
+	150 : NUM, val = 3
+	150 :ID, name = d
+	150 :ERROR, :
+	150 :ID, name = reserved
+	150 :ID, name = word
+	150 :ERROR, :
+	150 :ERROR, %
+	150 :ID, name = s
+	150 :ERROR, \
+	150 :ID, name = n
+	150 :ERROR, "
+	150 :,
+	150 :(
+	150 :*
+	150 :ID, name = check
+	150 :)
+	150 :ERROR, .
+	150 :ID, name = line
+	150 :,
+	150 :(
+	150 :*
+	150 :ID, name = check
+	150 :)
+	150 :ERROR, .
+	150 :ID, name = data
+	150 :)
+	150 :;
+151 : 				break;
+	151 :ID, name = break
+	151 :;
+152 : 			case DIGIT:
+	152 :ID, name = case
+	152 :ID, name = DIGIT
+	152 :ERROR, :
+153 : 				fprintf(out, "\t%3d : NUM, val = %s\n", (*check).line, (*check).data);
+	153 :ID, name = fprintf
+	153 :(
+	153 :ID, name = out
+	153 :,
+	153 :ERROR, "\
+	153 :ID, name = t
+	153 :ERROR, %
+	153 : NUM, val = 3
+	153 :ID, name = d
+	153 :ERROR, :
+	153 :ID, name = NUM
+	153 :,
+	153 :ID, name = val
+	153 :=
+	153 :ERROR, %
+	153 :ID, name = s
+	153 :ERROR, \
+	153 :ID, name = n
+	153 :ERROR, "
+	153 :,
+	153 :(
+	153 :*
+	153 :ID, name = check
+	153 :)
+	153 :ERROR, .
+	153 :ID, name = line
+	153 :,
+	153 :(
+	153 :*
+	153 :ID, name = check
+	153 :)
+	153 :ERROR, .
+	153 :ID, name = data
+	153 :)
+	153 :;
+154 : 				break;
+	154 :ID, name = break
+	154 :;
+155 : 			case SPECIAL_SYMBOL:
+	155 :ID, name = case
+	155 :ID, name = SPECIAL
+	155 :ERROR, _
+	155 :ID, name = SYMBOL
+	155 :ERROR, :
+156 : 				fprintf(out, "\t%3d :%s\n", (*check).line, (*check).data);
+	156 :ID, name = fprintf
+	156 :(
+	156 :ID, name = out
+	156 :,
+	156 :ERROR, "\
+	156 :ID, name = t
+	156 :ERROR, %
+	156 : NUM, val = 3
+	156 :ID, name = d
+	156 :ERROR, :%
+	156 :ID, name = s
+	156 :ERROR, \
+	156 :ID, name = n
+	156 :ERROR, "
+	156 :,
+	156 :(
+	156 :*
+	156 :ID, name = check
+	156 :)
+	156 :ERROR, .
+	156 :ID, name = line
+	156 :,
+	156 :(
+	156 :*
+	156 :ID, name = check
+	156 :)
+	156 :ERROR, .
+	156 :ID, name = data
+	156 :)
+	156 :;
+157 : 				break;
+	157 :ID, name = break
+	157 :;
+158 : 			case ID:
+	158 :ID, name = case
+	158 :ID, name = ID
+	158 :ERROR, :
+159 : 				fprintf(out, "\t%3d :ID, name = %s\n", (*check).line, (*check).data);
+	159 :ID, name = fprintf
+	159 :(
+	159 :ID, name = out
+	159 :,
+	159 :ERROR, "\
+	159 :ID, name = t
+	159 :ERROR, %
+	159 : NUM, val = 3
+	159 :ID, name = d
+	159 :ERROR, :
+	159 :ID, name = ID
+	159 :,
+	159 :ID, name = name
+	159 :=
+	159 :ERROR, %
+	159 :ID, name = s
+	159 :ERROR, \
+	159 :ID, name = n
+	159 :ERROR, "
+	159 :,
+	159 :(
+	159 :*
+	159 :ID, name = check
+	159 :)
+	159 :ERROR, .
+	159 :ID, name = line
+	159 :,
+	159 :(
+	159 :*
+	159 :ID, name = check
+	159 :)
+	159 :ERROR, .
+	159 :ID, name = data
+	159 :)
+	159 :;
+160 : 				break;
+	160 :ID, name = break
+	160 :;
+161 : 			case ERROR:
+	161 :ID, name = case
+	161 :ID, name = ERROR
+	161 :ERROR, :
+162 : 				fprintf(out, "\t%3d :ERROR, %s\n", (*check).line, (*check).data);
+	162 :ID, name = fprintf
+	162 :(
+	162 :ID, name = out
+	162 :,
+	162 :ERROR, "\
+	162 :ID, name = t
+	162 :ERROR, %
+	162 : NUM, val = 3
+	162 :ID, name = d
+	162 :ERROR, :
+	162 :ID, name = ERROR
+	162 :,
+	162 :ERROR, %
+	162 :ID, name = s
+	162 :ERROR, \
+	162 :ID, name = n
+	162 :ERROR, "
+	162 :,
+	162 :(
+	162 :*
+	162 :ID, name = check
+	162 :)
+	162 :ERROR, .
+	162 :ID, name = line
+	162 :,
+	162 :(
+	162 :*
+	162 :ID, name = check
+	162 :)
+	162 :ERROR, .
+	162 :ID, name = data
+	162 :)
+	162 :;
+163 : 				break;
+	163 :ID, name = break
+	163 :;
+164 : 			}
+	164 :}
+165 : 
+166 : 			check = (*check).next;
+	166 :ID, name = check
+	166 :=
+	166 :(
+	166 :*
+	166 :ID, name = check
+	166 :)
+	166 :ERROR, .
+	166 :ID, name = next
+	166 :;
+167 : 		}
+	167 :}
+168 : 
+169 : 		line++;
+	169 :ID, name = line
+	169 :+
+	169 :+
+	169 :;
+170 : 	}
+	170 :}
+171 : }
+	171 :}

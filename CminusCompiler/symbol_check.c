@@ -3,7 +3,7 @@
 
 int isLetter(char input)
 {
-	if ((input >= 'a' && input <= 'z') || (input >= 'A' && input <= 'z'))
+	if ((input >= 'a' && input <= 'z') || (input >= 'A' && input <= 'Z'))
 		return TRUE;
 	else
 		return FALSE;
@@ -31,10 +31,29 @@ int isSpecialSymbol(char input)
 int isWhiteSpace(char input)
 {
 	int i;
+	
+	if (input == -1) /* EOF */
+		return FALSE;
 
 	for (i = 0; i < sizeof(whiteSpaceTable) / sizeof(char); i++)
 		if (input == whiteSpaceTable[i])
 			return TRUE;
 
 	return FALSE;
+}
+
+enum status typeCheck(char* lookAhead)
+{
+	if (isLetter(*lookAhead))
+		return ID;
+	if (isDigit(*lookAhead))
+		return DIGIT;
+	if (isWhiteSpace(*lookAhead))
+		return WHITE_SPACE;
+	if (isSpecialSymbol(*lookAhead))
+		return SPECIAL_SYMBOL;
+	if (*lookAhead == -1)
+		return ENDFILE;
+
+	return ERROR;
 }

@@ -1,0 +1,74 @@
+  Func
+    Type: int
+    Id: gcd
+    Param
+      Type: int
+      Id: u
+    Param
+      Type: int
+      Id: v
+    Compound
+      If
+        Simple Expression
+          Var
+            Id: v
+          Op: ==
+          const: 0
+        Return
+          Simple Expression
+            Var
+              Id: u
+        Return
+          Simple Expression
+            Call
+              Id: gcd
+              Simple Expression
+                Var
+                  Id: v
+              Simple Expression
+                Var
+                  Id: u
+                Op: -
+                Var
+                  Id: u
+                Op: /
+                Var
+                  Id: v
+                Op: *
+                Var
+                  Id: v
+  Func
+    Type: void
+    Id: main
+    Type: void
+    Compound
+      Value
+        Type: int
+        Id: x
+      Value
+        Type: int
+        Id: y
+      Assign to
+        Var
+          Id: x
+        Simple Expression
+          Call
+            Id: input
+      Assign to
+        Var
+          Id: y
+        Simple Expression
+          Call
+            Id: input
+      Simple Expression
+        Call
+          Id: output
+          Simple Expression
+            Call
+              Id: gcd
+              Simple Expression
+                Var
+                  Id: x
+              Simple Expression
+                Var
+                  Id: y

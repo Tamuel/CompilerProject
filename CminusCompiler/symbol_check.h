@@ -1,3 +1,4 @@
+#pragma once
 
 /* Character가 문자인지 체크 */
 int isLetter(char input);
@@ -10,3 +11,6 @@ int isSpecialSymbol(char input);
 
 /* Character가 공백인지 체크 */
 int isWhiteSpace(char input);
+
+/* 타입 체크 */
+enum status typeCheck(char* lookAhead);
